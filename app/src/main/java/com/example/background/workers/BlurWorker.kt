@@ -18,6 +18,9 @@ class BlurWorker(ctx: Context, params: WorkerParameters): Worker(ctx,params) {
         val resourceUri = inputData.getString(KEY_IMAGE_URI)
         makeStatusNotification("Blurring Image", appContext)
 
+//        To Slow down Worker
+        sleep()
+
         return try {
 //            val picture = BitmapFactory.decodeResource(
 //                appContext.resources,
