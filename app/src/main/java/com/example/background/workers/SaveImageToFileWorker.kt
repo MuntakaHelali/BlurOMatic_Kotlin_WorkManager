@@ -17,10 +17,10 @@ import java.util.Locale
 /**
  * Saves the image to a permanent file
  */
-private const val TAGb = "SaveImageToFileWorker"
-class SaveImageToFileWorker(ctx: Context, params: WorkerParameters): Worker(ctx, params) {
+private const val TAGc = "SaveImageToFileWorker"
+class SaveImageToFileWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
-    private val title = "Blurred Image"
+    private val Title = "Blurred Image"
     private val dateFormatter = SimpleDateFormat(
         "yyyy.MM.dd 'at' HH:mm:ss z",
         Locale.getDefault()
@@ -33,21 +33,21 @@ class SaveImageToFileWorker(ctx: Context, params: WorkerParameters): Worker(ctx,
         sleep()
 
         val resolver = applicationContext.contentResolver
-        return try{
+        return try {
             val resourceUri = inputData.getString(KEY_IMAGE_URI)
             val bitmap = BitmapFactory.decodeStream(
                 resolver.openInputStream(Uri.parse(resourceUri)))
             val imageUrl = MediaStore.Images.Media.insertImage(
-                resolver, bitmap, title, dateFormatter.format(Date()))
-            if(!imageUrl.isNullOrEmpty()){
+                resolver, bitmap, Title, dateFormatter.format(Date()))
+            if (!imageUrl.isNullOrEmpty()) {
                 val output = workDataOf(KEY_IMAGE_URI to imageUrl)
-                Result.success()
-            }
-            else{
-                Log.e(TAGb, "Writing to MediaStore Failed")
+
+                Result.success(output)
+            } else {
+                Log.e(TAGc, "Writing to MediaStore failed")
                 Result.failure()
             }
-        } catch (exception: Exception){
+        } catch (exception: Exception) {
             exception.printStackTrace()
             Result.failure()
         }

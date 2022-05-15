@@ -9,37 +9,42 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.example.background.KEY_IMAGE_URI
-import com.example.background.R
 
-class BlurWorker(ctx: Context, params: WorkerParameters): Worker(ctx,params) {
+private const val TAGa = "BlurWorker"
+class BlurWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
     override fun doWork(): Result {
         val appContext = applicationContext
-        val resourceUri = inputData.getString(KEY_IMAGE_URI)
-        makeStatusNotification("Blurring Image", appContext)
 
-//        To Slow down Worker
+        val resourceUri = inputData.getString(KEY_IMAGE_URI)
+
+        makeStatusNotification("Blurring image", appContext)
+
+        // This is an utility function added to emulate slower work.
         sleep()
 
         return try {
-//            val picture = BitmapFactory.decodeResource(
-//                appContext.resources,
-//                R.drawable.android_cupcake
-//            )
-            //blurBitmap(picture, appContext)
-                if(TextUtils.isEmpty(resourceUri)){
-                    Log.e(TAG, "Invalid URI")
-                    throw IllegalArgumentException("Invalid input uri")
-                }
+            if (TextUtils.isEmpty(resourceUri)) {
+                Log.e(TAGa, "Invalid input uri")
+                throw IllegalArgumentException("Invalid input uri")
+            }
+
+            val resolver = appContext.contentResolver
+
             val picture = BitmapFactory.decodeStream(
-                appContext.contentResolver.openInputStream(Uri.parse(resourceUri))
-            )
-            val outputUri = writeBitmapToFile(appContext, blurBitmap(picture, appContext))
-            makeStatusNotification("Output is $outputUri", appContext)
+                resolver.openInputStream(Uri.parse(resourceUri)))
+
+            val output = blurBitmap(picture, appContext)
+
+            // Write bitmap to a temp file
+            val outputUri = writeBitmapToFile(appContext, output)
+
             val outputData = workDataOf(KEY_IMAGE_URI to outputUri.toString())
+
             Result.success(outputData)
-        } catch (throwable: Throwable){
-            Log.e(TAG, "Error applying blur")
+        } catch (throwable: Throwable) {
+            Log.e(TAGa, "Error applying blur")
+            throwable.printStackTrace()
             Result.failure()
         }
     }

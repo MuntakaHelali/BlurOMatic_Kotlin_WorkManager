@@ -12,7 +12,7 @@ import java.lang.Exception
 /**
  * Cleans up temporary files generated during blurring process
  */
-private const val TAGa ="CleanupWorker"
+private const val TAGb ="CleanupWorker"
 class CleanupWorker(ctx: Context, params: WorkerParameters):Worker(ctx, params) {
     override fun doWork(): Result {
         // Makes a notification when the work starts and slows down the work so that
@@ -34,7 +34,7 @@ class CleanupWorker(ctx: Context, params: WorkerParameters):Worker(ctx, params) 
                         if(name.isNotEmpty() && name.endsWith(".png")) {
 //                      Deletes the files created by the program since the blur image will be a .png
                             val deleted = entry.delete()
-                            Log.i(TAGa, "Deleted $name - $deleted")
+                            Log.i(TAGb, "Deleted $name - $deleted")
                         }
                     }
                 }
