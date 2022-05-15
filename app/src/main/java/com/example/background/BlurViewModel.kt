@@ -47,14 +47,25 @@ class BlurViewModel(application: Application) : ViewModel() {
 //        workManager.enqueue(OneTimeWorkRequest.from(BlurWorker::class.java))
 
         // Add WorkRequest to Cleanup temporary images
-        var continuation = workManager.beginWith(OneTimeWorkRequest.from(CleanupWorker::class.java))
+//        var continuation = workManager.beginWith(OneTimeWorkRequest.from(CleanupWorker::class.java))
+        var continuation = workManager.beginUniqueWork(
+            IMAGE_MANIPULATION_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
+            OneTimeWorkRequest.from(CleanupWorker::class.java)
+        )
 
-        // Add WorkRequest to blur the image
-        val blurRequest = OneTimeWorkRequestBuilder<BlurWorker>()
-            .setInputData(createInputDataForUri())
-            .build()
-        //workManager.enqueue(blurRequest)
-        continuation.then(blurRequest)
+        // Add WorkRequest to blur the image the number of times requested
+        for (i in 0 until blurLevel) {
+            val blurRequest = OneTimeWorkRequestBuilder<BlurWorker>()
+            // Input the Uri if this is the first blur operation
+            // After the first blur operation the input will be the output of previous
+            // blur operations.
+            if (i == 0) {
+                blurRequest.setInputData(createInputDataForUri())
+            }
+            //workManager.enqueue(blurRequest)
+            continuation = continuation.then(blurRequest.build())
+        }
 
         // Add WorkRequest to save the image to the filesystem
         val save = OneTimeWorkRequest.Builder(SaveImageToFileWorker::class.java).build()
